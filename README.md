@@ -1,0 +1,2 @@
+# infoxp
+LLM about game
