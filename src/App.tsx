@@ -1,34 +1,31 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [darkMode, setDarkMode] = useState(false)
+
+  const turnOnDarkMode = () => {
+    setDarkMode(!darkMode)
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className={`${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+      <div className={`p-4 justify-center items-center flex h-screen flex-col transition-colors duration-300 ${darkMode ? 'bg-black text-white' : 'bg-white text-black'
+        }`}>
+        <button
+          onClick={turnOnDarkMode}
+          className={`fixed top-4 right-4 z-50 p-2 rounded-full shadow hover:scale-105 transition ${darkMode ? 'bg-white text-black' : 'bg-black text-white'
+            }`}
+        >
+          {darkMode ? '☀️' : '🌕'}
         </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+
+        <h1 className="text-3xl font-bold mb-4">Hello Tailwind</h1>
+        <p className="text-lg lowercase">
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. ...
         </p>
+        <p className='text-2xl'>Hello World</p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
