@@ -1,29 +1,38 @@
 import { useState } from 'react'
+import { Route, Routes } from 'react-router-dom'
+import Navbar from './components/navbar/Navbar'
+import Home from './components/home/Home'
+import Genre from './components/genre/Genre'
+import Games from './components/games/Games'
+import Chat from './components/chat/Chat'
 
 const App = () => {
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
 
   const turnOnDarkMode = () => {
     setDarkMode(!darkMode)
   }
 
   return (
-    <div className={`${darkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
-      <div className={`p-4 justify-center items-center flex h-screen flex-col transition-colors duration-300 ${darkMode ? 'bg-black text-white' : 'bg-white text-black'
-        }`}>
+    <div className={`${darkMode ? 'bg-[#2D333C] text-[#DCDEDF]' : 'bg-white text-black'} min-h-screen`}>
+      <div className="w-full flex justify-center pt-8">
+        <Navbar />
+      </div>
+      <div className="mt-12 p-4 flex flex-col items-center transition-colors duration-300 text-[18px]">
         <button
           onClick={turnOnDarkMode}
-          className={`fixed top-4 right-4 z-50 p-2 rounded-full shadow hover:scale-105 transition ${darkMode ? 'bg-white text-black' : 'bg-black text-white'
+          className={`fixed bottom-4 left-4 z-50 p-2 rounded-full shadow hover:scale-105 transition ${darkMode ? 'bg-white text-black' : 'bg-black text-white'
             }`}
         >
           {darkMode ? '☀️' : '🌕'}
         </button>
 
-        <h1 className="text-3xl font-bold mb-4">Hello Tailwind</h1>
-        <p className="text-lg lowercase">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. ...
-        </p>
-        <p className='text-2xl'>Hello World</p>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/genre' element={<Genre />} />
+          <Route path='/games' element={<Games />} />
+          <Route path='/chat' element={<Chat />} />
+        </Routes>
       </div>
     </div>
   )
