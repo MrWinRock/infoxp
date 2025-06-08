@@ -14,14 +14,14 @@ const App = () => {
   }
 
   return (
-    <div className={`${darkMode ? 'bg-[#2D333C] text-[#DCDEDF]' : 'bg-white text-black'} min-h-screen`}>
+    <div className={`${darkMode ? 'bg-[#2D333C] text-[#DCDEDF]' : 'bg-[#ddd] text-[#171d25]'} min-h-screen`}>
       <div className="w-full flex justify-center pt-8">
         <Navbar />
       </div>
       <div className="mt-12 p-4 flex flex-col items-center transition-colors duration-300 text-[18px]">
         <button
           onClick={turnOnDarkMode}
-          className={`fixed bottom-4 left-4 z-50 p-2 rounded-full shadow hover:scale-105 transition ${darkMode ? 'bg-white text-black' : 'bg-black text-white'
+          className={`fixed bottom-4 left-4 z-50 p-2 rounded-full shadow hover:scale-105 transition ${darkMode ? 'bg-[#ddd] text-[#171d25]' : 'bg-[#2D333C] text-[#DCDEDF]'
             }`}
         >
           {darkMode ? '☀️' : '🌕'}

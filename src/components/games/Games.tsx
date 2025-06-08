@@ -1,8 +1,16 @@
+import GridContainer from "../item/GridContainer";
+import ItemBox from "../item/ItemBox";
+
 const Games = () => {
+    const items: React.ReactNode[] = [...Array(32)].map((_, i) => (
+        <ItemBox key={i}>
+            Item {i + 1}
+        </ItemBox>
+    ));
+
     return (
-        <div className="games">
-            <h1>Games Page</h1>
-            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Voluptates blanditiis voluptatum explicabo aperiam numquam aspernatur voluptate nam adipisci incidunt, laudantium labore reprehenderit, porro corporis consectetur dolor totam assumenda quam repellat!</p>
+        <div className="games w-full max-w-6xl mx-auto mt-6">
+            <GridContainer title="Games" name={items} />
         </div>
     );
 }
