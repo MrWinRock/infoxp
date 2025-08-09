@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { API_URL } from '../../apiConfig';
+import { API_BASE_URL } from '../../config/api';
 
 interface Message {
     sender: 'user' | 'chatbot';
@@ -39,14 +39,13 @@ const Chat = () => {
         try {
             const response = await axios({
                 method: 'POST',
-                url: `${API_URL}/chat`,
+                url: `${API_BASE_URL}/chat`,
                 data: {
                     message: currentInput,
                     userId: userId,
                 },
                 responseType: 'stream'
             });
-
             const newUserId = response.headers['x-user-id'];
             if (newUserId && !userId) {
                 setUserId(newUserId);

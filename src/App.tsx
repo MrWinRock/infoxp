@@ -5,6 +5,8 @@ import Home from './components/home/Home'
 import Genre from './components/genre/Genre'
 import Games from './components/games/Games'
 import Chat from './components/chat/Chat'
+import Login from './components/auth/Login'
+import Register from './components/auth/Register'
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(true)
@@ -32,6 +34,8 @@ const App = () => {
           <Route path='/genre' element={<Genre />} />
           <Route path='/games' element={<Games />} />
           <Route path='/chat' element={<Chat />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
         </Routes>
       </div>
     </div>

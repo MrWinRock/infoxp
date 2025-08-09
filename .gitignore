@@ -7,12 +7,23 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies / build
 node_modules
 dist
 dist-ssr
-*.local
 
-# Editor directories and files
+# Bun cache (keep bun.lockb tracked for reproducible installs)
+.bun
+
+# TypeScript build info (you store in node_modules/.tmp but include anyway)
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -23,4 +34,16 @@ dist-ssr
 *.sln
 *.sw?
 
-apiConfig.ts
+# Caches
+.cache
+.next
+coverage
+tmp
+.temp
+
+# Tailwind / framework caches (if created)
+.postcss-cache
+.stylelintcache
+
+# Remove old unused ignore
+# apiConfig.ts  (now using src/config/api.ts and should be committed)

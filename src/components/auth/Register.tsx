@@ -1,0 +1,117 @@
+import { useState } from 'react';
+import { register } from '../../services/authService';
+
+const Register = () => {
+    const [form, setForm] = useState({ name: '', email: '', password: '', date_of_birth: '' });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [msg, setMsg] = useState<string | null>(null);
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+        setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+    const validate = () => {
+        if (!form.name.trim()) return 'Name is required';
+        if (form.password.length < 8) return 'Password must be at least 8 characters long';
+        return null;
+    };
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (loading) return;
+        setError(null);
+        setMsg(null);
+        const vErr = validate();
+        if (vErr) {
+            setError(vErr);
+            return;
+        }
+        setLoading(true);
+        try {
+            const { name, email, password, date_of_birth } = form;
+            const res = await register({
+                name,
+                email,
+                password,
+                date_of_birth: date_of_birth || undefined
+            });
+            if (res.token) localStorage.setItem('auth_token', res.token);
+            setMsg(res.message || 'User created successfully');
+        } catch (err: unknown) {
+            if (typeof err === 'object' && err !== null && 'response' in err) {
+                const errorObj = err as { response?: { data?: { message?: string } } };
+                setError(errorObj.response?.data?.message || 'Registration failed');
+            } else {
+                setError('Registration failed');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="w-full max-w-md mx-auto mt-20 bg-white dark:bg-[#171D25] p-6 rounded shadow">
+            <h2 className="text-2xl font-bold mb-4">Register</h2>
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
+                    <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        value={form.name}
+                        onChange={onChange}
+                        className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        value={form.email}
+                        onChange={onChange}
+                        className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        value={form.password}
+                        onChange={onChange}
+                        className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1" htmlFor="date_of_birth">Date of Birth (optional)</label>
+                    <input
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        type="date"
+                        value={form.date_of_birth}
+                        onChange={onChange}
+                        className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
+                    />
+                </div>
+                {error && <p className="text-sm text-red-600">{error}</p>}
+                {msg && <p className="text-sm text-green-600">{msg}</p>}
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2 rounded bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold"
+                >
+                    {loading ? 'Registering...' : 'Register'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default Register;
