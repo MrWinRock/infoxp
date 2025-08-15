@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { IoChatbubbleOutline } from "react-icons/io5"
+import { useEffect, useState } from 'react';
 
 const navLinks = [
     { to: '/', label: 'Home' },
@@ -16,7 +17,30 @@ const navLinks = [
 ]
 
 const Navbar = () => {
-    const location = useLocation()
+    const location = useLocation();
+    const [user, setUser] = useState<{ name: string } | null>(null);
+
+    useEffect(() => {
+        const loadUser = () => {
+            try {
+                const raw = localStorage.getItem('user')
+                if (raw) {
+                    const parsed = JSON.parse(raw)
+                    if (parsed?.name) setUser(parsed)
+                    else setUser(null)
+                } else setUser(null)
+            } catch {
+                setUser(null)
+            }
+        }
+        loadUser()
+        window.addEventListener('storage', loadUser)
+        window.addEventListener('user-updated', loadUser)
+        return () => {
+            window.removeEventListener('storage', loadUser)
+            window.removeEventListener('user-updated', loadUser)
+        }
+    }, [])
 
     return (
         <nav className="w-full fixed top-0 left-0 z-40 bg-white dark:bg-[#171D25] border-b border-gray-200 dark:border-gray-700 shadow-lg">
@@ -47,18 +71,29 @@ const Navbar = () => {
 
                 {/* Login/Register Buttons */}
                 <div className="flex gap-4 flex-shrink-0">
-                    <Link
-                        to="/login"
-                        className="text-[18px] font-medium px-3 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200 text-blue-700 dark:text-[#1A9FFF]"
-                    >
-                        Login
-                    </Link>
-                    <Link
-                        to="/register"
-                        className="text-[18px] font-medium px-3 py-1 rounded border border-blue-500 text-blue-700 dark:text-[#1A9FFF] hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors duration-200"
-                    >
-                        Register
-                    </Link>
+                    {user ? (
+                        <Link
+                            to="/profile"
+                            className="text-[18px] font-semibold text-blue-700 dark:text-[#1A9FFF] cursor-pointer hover:underline"
+                        >
+                            {user.name}
+                        </Link>
+                    ) : (
+                        <>
+                            <Link
+                                to="/login"
+                                className="text-[18px] font-medium px-3 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200 text-blue-700 dark:text-[#1A9FFF]"
+                            >
+                                Login
+                            </Link>
+                            <Link
+                                to="/register"
+                                className="text-[18px] font-medium px-3 py-1 rounded border border-blue-500 text-blue-700 dark:text-[#1A9FFF] hover:bg-blue-50 dark:hover:bg-blue-950 transition-colors duration-200"
+                            >
+                                Register
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>

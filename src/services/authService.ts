@@ -24,11 +24,11 @@ export interface AuthResult {
 }
 
 export const login = async (data: LoginPayload): Promise<AuthResult> => {
-    const res = await apiClient.post<AuthResult>('/users/login', data);
+    const res = await apiClient.post<AuthResult>('/api/users/login', data);
     return res.data;
 };
 
 export const register = async (data: RegisterPayload): Promise<AuthResult> => {
-    const res = await apiClient.post<AuthResult>('/users/register', data);
+    const res = await apiClient.post<AuthResult>('/api/users/register', data);
     return res.data;
 };

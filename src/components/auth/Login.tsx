@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { login } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
+import { IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5';
 
 const Login = () => {
     const [form, setForm] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [msg, setMsg] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -14,12 +17,15 @@ const Login = () => {
         e.preventDefault();
         if (loading) return;
         setError(null);
-        setMsg(null);
         setLoading(true);
         try {
             const res = await login(form);
             if (res.token) localStorage.setItem('auth_token', res.token);
-            setMsg(res.message || (res.user ? `Welcome ${res.user.name}` : 'Login success'));
+            if (res.user) {
+                localStorage.setItem('user', JSON.stringify(res.user));
+                window.dispatchEvent(new Event('user-updated'));
+                navigate('/');
+            }
         } catch (err: unknown) {
             if (typeof err === 'object' && err !== null && 'response' in err) {
                 const response = (err as { response?: { data?: { message?: string } } }).response;
@@ -39,7 +45,7 @@ const Login = () => {
             <h2 className="text-2xl font-bold mb-4">Login</h2>
             <form onSubmit={onSubmit} className="space-y-4">
                 <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
+                    <label className="block text-md font-medium mb-1" htmlFor="email">Email</label>
                     <input
                         id="email"
                         name="email"
@@ -50,30 +56,42 @@ const Login = () => {
                         className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                     />
                 </div>
+
                 <div>
-                    <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
+                    <div className="flex items-center justify-between mb-1">
+                        <label className="block text-md font-medium" htmlFor="password">Password</label>
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(s => !s)}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            className="inline-flex items-center justify-center h-8 w-8 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                            {showPassword ? <IoEyeOffOutline size={18} /> : <IoEyeOutline size={18} />}
+                        </button>
+                    </div>
                     <input
                         id="password"
                         name="password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         required
                         value={form.password}
                         onChange={onChange}
                         className="w-full px-3 py-2 rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
                     />
                 </div>
+
                 {error && <p className="text-sm text-red-600">{error}</p>}
-                {msg && <p className="text-sm text-green-600">{msg}</p>}
+
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2 rounded bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold"
+                    className="p-button w-full"
                 >
                     {loading ? 'Logging in...' : 'Login'}
                 </button>
             </form>
         </div>
     );
-};
+}
 
 export default Login;
