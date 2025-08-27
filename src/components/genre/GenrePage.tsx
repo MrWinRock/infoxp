@@ -38,7 +38,13 @@ const GenrePage = () => {
             {/* Back button */}
             <div className="mb-6">
                 <button
-                    onClick={() => navigate('/genre')}
+                    onClick={() => {
+                        if (window.history.length > 2) {
+                            navigate(-1);
+                        } else {
+                            navigate('/games');
+                        }
+                    }}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
                 >
                     ← Back to Genres

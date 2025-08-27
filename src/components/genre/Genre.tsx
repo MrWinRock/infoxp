@@ -6,9 +6,8 @@ const Genre = () => {
     const allGenres = [...new Set(games.flatMap(game => game.genre))].filter(Boolean);
 
     const genreItems: React.ReactNode[] = allGenres.map((genre) => {
-        // Find games that match this genre
+
         const matchingGames = games.filter(game => game.genre.includes(genre));
-        // Pick a random game from matching games
         const randomGame = matchingGames[Math.floor(Math.random() * matchingGames.length)];
 
         return (

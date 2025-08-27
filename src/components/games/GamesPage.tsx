@@ -63,7 +63,7 @@ const GamesPage = () => {
                     <div className="space-y-4">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                             <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Game Information</h3>
-                            <div className="space-y-2 text-sm">
+                            <div className="space-y-2 text-md">
                                 <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Release Date:</span>
                                     <span className="text-gray-900 dark:text-white font-medium">{game.releaseDate}</span>
@@ -90,20 +90,26 @@ const GamesPage = () => {
                         </div>
 
                         {/* Action buttons */}
-                        <div className="space-y-2">
+                        <div className="flex flex-col gap-4">
                             <a
                                 href={`https://store.steampowered.com/app/${game.steamAppId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="p-button w-full text-center"
+                                className="p-button block w-full text-center cursor-pointer"
                             >
                                 View on Steam
                             </a>
                             <button
-                                onClick={() => navigate('/games')}
-                                className="w-full py-2 px-4 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                onClick={() => {
+                                    if (window.history.length > 2) {
+                                        navigate(-1);
+                                    } else {
+                                        navigate('/games');
+                                    }
+                                }}
+                                className="w-full py-2 px-4 border cursor-pointer border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                             >
-                                Back to Games
+                                ← Back
                             </button>
                         </div>
                     </div>
