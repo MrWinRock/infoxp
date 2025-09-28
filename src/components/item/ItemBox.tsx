@@ -20,8 +20,6 @@ const ItemBox = ({ children, className = "", image, alt = "", steamAppId, genreN
         }
     };
 
-    console.log(children);
-
     return (
         <div
             className={`group relative rounded h-64 w-64 flex items-center justify-center max-w-full transition-all duration-300 ease-in-out hover:shadow-xl ${(steamAppId || genreName) ? 'cursor-pointer' : ''} ${className}`}

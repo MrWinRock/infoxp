@@ -1,27 +1,49 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import games from '../../data/games';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { fetchGames, Game } from '../../services/gameService';
+
+const toImageSrc = (imageUrl?: string) =>
+    imageUrl?.startsWith('http') ? imageUrl : imageUrl ? `/images/${imageUrl}` : '/images/default.jpg';
 
 const GamesPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [games, setGames] = useState<Game[] | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const game = games.find(g => g.steamAppId.toString() === id);
+    const appId = Number(id);
 
     useEffect(() => {
-        if (!game) {
-            navigate('/games', { replace: true });
-        }
-    }, [game, navigate]);
+        let mounted = true;
+        fetchGames()
+            .then(data => mounted && setGames(data))
+            .catch(err => {
+                console.error(err);
+                if (mounted) setError('Failed to load games');
+            });
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
+    const game = useMemo(
+        () => (games || []).find(g => g.steamAppId === appId),
+        [games, appId]
+    );
+
+    useEffect(() => {
+        if (games && !game) navigate('/games', { replace: true });
+    }, [games, game, navigate]);
+
+    if (error) return <div className="w-full max-w-6xl mx-auto mt-6 text-red-500">{error}</div>;
+    if (!games) return <div className="w-full max-w-6xl mx-auto mt-6">Loading...</div>;
     if (!game) return null;
 
     return (
         <div className="games-page w-full max-w-4xl mx-auto mt-6 bg-white dark:bg-[#171D25] rounded-lg shadow-lg overflow-hidden">
-            {/* Header with game image */}
             <div className="relative h-64 overflow-hidden">
                 <img
-                    src={`/images/${game.imageUrl}`}
+                    src={toImageSrc(game.image_url)}
                     alt={game.title}
                     className="w-full h-full object-cover"
                 />
@@ -32,10 +54,8 @@ const GamesPage = () => {
                 </div>
             </div>
 
-            {/* Game details */}
             <div className="p-6">
                 <div className="grid md:grid-cols-2 gap-6">
-                    {/* Left column - Main info */}
                     <div className="space-y-4">
                         <div>
                             <h2 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Description</h2>
@@ -47,7 +67,7 @@ const GamesPage = () => {
                         <div>
                             <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Genres</h3>
                             <div className="flex flex-wrap gap-2">
-                                {game.genre.map((g, i) => (
+                                {(game.genre || []).map((g, i) => (
                                     <span
                                         key={i}
                                         className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
@@ -59,7 +79,6 @@ const GamesPage = () => {
                         </div>
                     </div>
 
-                    {/* Right column - Game details */}
                     <div className="space-y-4">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                             <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Game Information</h3>
@@ -89,7 +108,6 @@ const GamesPage = () => {
                             </div>
                         </div>
 
-                        {/* Action buttons */}
                         <div className="flex flex-col gap-4">
                             <a
                                 href={`https://store.steampowered.com/app/${game.steamAppId}`}
