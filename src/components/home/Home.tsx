@@ -29,16 +29,19 @@ const Home = () => {
     }
 
     // Get first 8 games for home page
-    const gameItems: React.ReactNode[] = games.slice(0, 8).map((game) => (
-        <ItemBox
-            key={game.steamAppId}
-            image={toImageSrc(game.image_url)}
-            alt={game.title}
-            steamAppId={game.steamAppId}
-        >
-            {game.title}
-        </ItemBox>
-    ));
+    const gameItems: React.ReactNode[] = games.slice(0, 8).map((game) => {
+        return (
+            <ItemBox
+                key={game._id}
+                image={toImageSrc(game.image_url)}
+                alt={game.title}
+                _id={game._id}
+                steam_app_id={game.steam_app_id}
+            >
+                {game.title}
+            </ItemBox>
+        );
+    });
 
     // Extract unique genres and create genre items
     const allGenres = [...new Set(games.flatMap(game => game.genre || []))].filter(Boolean);

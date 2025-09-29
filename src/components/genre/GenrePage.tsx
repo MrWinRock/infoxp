@@ -48,10 +48,11 @@ const GenrePage = () => {
 
     const gameItems: React.ReactNode[] = gamesInGenre.map((game) => (
         <ItemBox
-            key={game.steamAppId}
-            image={toImageSrc(game.imageUrl)}
+            key={game.steam_app_id}
+            image={toImageSrc(game.image_url)}
             alt={game.title}
-            steamAppId={game.steamAppId}
+            _id={game._id}
+            steam_app_id={game.steam_app_id}
         >
             {game.title}
         </ItemBox>

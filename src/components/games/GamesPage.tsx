@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
-import { fetchGames, Game } from '../../services/gameService';
+import { useEffect, useState } from 'react';
+import { fetchGameById, Game } from '../../services/gameService';
 
 const toImageSrc = (imageUrl?: string) =>
     imageUrl?.startsWith('http') ? imageUrl : imageUrl ? `/images/${imageUrl}` : '/images/default.jpg';
@@ -8,35 +8,46 @@ const toImageSrc = (imageUrl?: string) =>
 const GamesPage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [games, setGames] = useState<Game[] | null>(null);
+    const [game, setGame] = useState<Game | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const appId = Number(id);
+    console.log('GamesPage params:', { id });
+
 
     useEffect(() => {
+        const appId = id;
+        console.log('Fetching game with appId:', appId);
+
+        if (!appId) {
+            navigate('/games', { replace: true });
+            return;
+        }
+
         let mounted = true;
-        fetchGames()
-            .then(data => mounted && setGames(data))
+        setLoading(true);
+        setError(null);
+
+        fetchGameById(appId)
+            .then(data => {
+                if (!mounted) return;
+                if (!data) {
+                    navigate('/games', { replace: true });
+                    return;
+                }
+                setGame(data);
+            })
             .catch(err => {
                 console.error(err);
-                if (mounted) setError('Failed to load games');
-            });
-        return () => {
-            mounted = false;
-        };
-    }, []);
+                if (mounted) setError('Failed to load game');
+            })
+            .finally(() => mounted && setLoading(false));
 
-    const game = useMemo(
-        () => (games || []).find(g => g.steamAppId === appId),
-        [games, appId]
-    );
-
-    useEffect(() => {
-        if (games && !game) navigate('/games', { replace: true });
-    }, [games, game, navigate]);
+        return () => { mounted = false; };
+    }, [id, navigate]);
 
     if (error) return <div className="w-full max-w-6xl mx-auto mt-6 text-red-500">{error}</div>;
-    if (!games) return <div className="w-full max-w-6xl mx-auto mt-6">Loading...</div>;
+    if (loading) return <div className="w-full max-w-6xl mx-auto mt-6">Loading...</div>;
     if (!game) return null;
 
     return (
@@ -97,7 +108,7 @@ const GamesPage = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Steam App ID:</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">{game.steamAppId}</span>
+                                    <span className="text-gray-900 dark:text-white font-medium">{game.steam_app_id}</span>
                                 </div>
                                 {game.technologies && (
                                     <div className="flex justify-between">
@@ -110,7 +121,7 @@ const GamesPage = () => {
 
                         <div className="flex flex-col gap-4">
                             <a
-                                href={`https://store.steampowered.com/app/${game.steamAppId}`}
+                                href={`https://store.steampowered.com/app/${game.steam_app_id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-button block w-full text-center cursor-pointer"
