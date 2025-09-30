@@ -46,7 +46,7 @@ const ItemBox = ({ children, className = "", image, alt = "", _id, steam_app_id,
             {/* Content Wrapper */}
             <div className="relative z-10 m-2 flex my-auto items-center justify-center">
                 {/* Text Background*/}
-                <div className="bg-white text-[#1A9FFF] text-lg font-semibold px-3 py-1 rounded-md backdrop-blur-sm">
+                <div className="bg-white text-[#0876c4] text-lg font-semibold mt-12 px-3 py-1 rounded-md backdrop-blur-sm transition-all duration-300 ease-in-out group-hover:mt-32">
                     {children}
                 </div>
             </div>

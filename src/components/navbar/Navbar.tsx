@@ -18,7 +18,7 @@ const navLinks = [
 
 const Navbar = () => {
     const location = useLocation();
-    const [user, setUser] = useState<{ name: string } | null>(null);
+    const [user, setUser] = useState<{ name: string; role?: string } | null>(null);
 
     useEffect(() => {
         const loadUser = () => {
@@ -70,14 +70,24 @@ const Navbar = () => {
                 </div>
 
                 {/* Login/Register Buttons */}
-                <div className="flex gap-4 flex-shrink-0">
+                <div className="flex gap-4 flex-shrink-0 items-center">
                     {user ? (
-                        <Link
-                            to="/profile"
-                            className="text-[18px] font-semibold text-blue-700 dark:text-[#1A9FFF] cursor-pointer hover:underline"
-                        >
-                            {user.name}
-                        </Link>
+                        <>
+                            {user.role === 'admin' && (
+                                <Link
+                                    to="/admin/dashboard"
+                                    className="text-[18px] font-semibold px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition-colors"
+                                >
+                                    Admin
+                                </Link>
+                            )}
+                            <Link
+                                to="/profile"
+                                className="text-[18px] font-semibold text-blue-700 dark:text-[#1A9FFF] cursor-pointer hover:underline"
+                            >
+                                {user.name}
+                            </Link>
+                        </>
                     ) : (
                         <>
                             <Link

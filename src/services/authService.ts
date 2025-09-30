@@ -17,6 +17,7 @@ export interface AuthUser {
     name: string;
     email: string;
     date_of_birth?: string;
+    role?: string;
 }
 
 export interface AuthResult {

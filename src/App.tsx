@@ -9,6 +9,10 @@ import Chat from './components/chat/Chat'
 import Profile from './components/profile/Profile'
 import Login from './components/auth/Login'
 import Register from './components/auth/Register'
+import AdminLayout from './components/admin/AdminLayout'
+import Dashboard from './components/admin/Dashboard.admin'
+import GameManagement from './components/admin/GameManagement.admin'
+import UserManagement from './components/admin/UserManagement.admin'
 
 const App = () => {
 
@@ -29,6 +33,13 @@ const App = () => {
           <Route path='/profile' element={<Profile />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="games" element={<GameManagement />} />
+            <Route path="users" element={<UserManagement />} />
+          </Route>
         </Routes>
 
       </div>
