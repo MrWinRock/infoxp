@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { fetchGameById, Game } from '../../services/gameService';
 
 const toImageSrc = (imageUrl?: string) =>
@@ -25,8 +25,10 @@ const GamesPage = () => {
         }
 
         let mounted = true;
-        setLoading(true);
-        setError(null);
+        startTransition(() => {
+            setLoading(true);
+            setError(null);
+        });
 
         fetchGameById(appId)
             .then(data => {

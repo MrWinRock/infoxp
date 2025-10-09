@@ -9,11 +9,24 @@ const toImageSrc = (imageUrl?: string) =>
 const Home = () => {
     const [games, setGames] = useState<Game[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [genreRepresentative, setGenreRepresentative] = useState<Record<string, Game | undefined>>({});
 
     useEffect(() => {
         let mounted = true;
         fetchGames()
-            .then(data => mounted && setGames(data))
+            .then(data => {
+                if (!mounted) return;
+                setGames(data);
+                const representatives: Record<string, Game | undefined> = {};
+                const genres = [...new Set(data.flatMap(g => g.genre || []))].filter(Boolean) as string[];
+                genres.forEach(genre => {
+                    const matching = data.filter(g => (g.genre || []).includes(genre));
+                    if (matching.length) {
+                        representatives[genre] = matching[Math.floor(Math.random() * matching.length)];
+                    }
+                });
+                setGenreRepresentative(representatives);
+            })
             .catch(err => {
                 console.error(err);
                 if (mounted) setError('Failed to load games');
@@ -46,13 +59,11 @@ const Home = () => {
     // Extract unique genres and create genre items
     const allGenres = [...new Set(games.flatMap(game => game.genre || []))].filter(Boolean);
     const genreItems: React.ReactNode[] = allGenres.slice(0, 8).map((genre) => {
-        const matchingGames = games.filter(game => (game.genre || []).includes(genre));
-        const randomGame = matchingGames[Math.floor(Math.random() * matchingGames.length)];
-
+        const representative = genreRepresentative[genre];
         return (
             <ItemBox
                 key={genre}
-                image={toImageSrc(randomGame?.image_url)}
+                image={toImageSrc(representative?.image_url)}
                 alt={genre}
                 genreName={genre}
             >
