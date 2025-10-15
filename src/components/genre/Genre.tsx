@@ -9,7 +9,6 @@ const toImageSrc = (imageUrl?: string) =>
 const Genre = () => {
     const [games, setGames] = useState<Game[] | null>(null);
     const [error, setError] = useState<string | null>(null);
-    // Precomputed representative game per genre so we don't call Math.random during render
     const [genreRepresentative, setGenreRepresentative] = useState<Record<string, Game | undefined>>({});
 
     useEffect(() => {
@@ -18,7 +17,6 @@ const Genre = () => {
             .then(data => {
                 if (!mounted) return;
                 setGames(data);
-                // Compute one representative game per genre (randomly) as an effect-side pure update
                 const representatives: Record<string, Game | undefined> = {};
                 const genres = [...new Set(data.flatMap(g => g.genre || []))].filter(Boolean) as string[];
                 genres.forEach(genre => {

@@ -1,7 +1,8 @@
-import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState, startTransition } from 'react';
-import { fetchGameById, Game } from '../../services/gameService';
+import { useNavigate, useParams } from 'react-router-dom';
+import { fetchGameById, type Game } from '../../services/gameService';
 
+// ...existing code...
 const toImageSrc = (imageUrl?: string) =>
     imageUrl?.startsWith('http') ? imageUrl : imageUrl ? `/images/${imageUrl}` : '/images/default.jpg';
 
@@ -12,14 +13,8 @@ const GamesPage = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-    console.log('GamesPage params:', { id });
-
-
     useEffect(() => {
-        const appId = id;
-        console.log('Fetching game with appId:', appId);
-
-        if (!appId) {
+        if (!id) {
             navigate('/games', { replace: true });
             return;
         }
@@ -30,7 +25,7 @@ const GamesPage = () => {
             setError(null);
         });
 
-        fetchGameById(appId)
+        fetchGameById(id)
             .then(data => {
                 if (!mounted) return;
                 if (!data) {
@@ -63,7 +58,7 @@ const GamesPage = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">
                     <h1 className="text-4xl font-bold mb-2">{game.title}</h1>
-                    <p className="text-lg opacity-90">{game.developer}</p>
+                    <p className="text-lg opacity-90">{(game.developer ?? []).join(', ')}</p>
                 </div>
             </div>
 
@@ -102,7 +97,7 @@ const GamesPage = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Developer:</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">{game.developer}</span>
+                                    <span className="text-gray-900 dark:text-white font-medium">{(game.developer ?? []).join(', ')}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Publisher:</span>
@@ -110,12 +105,14 @@ const GamesPage = () => {
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600 dark:text-gray-400">Steam App ID:</span>
-                                    <span className="text-gray-900 dark:text-white font-medium">{game.steam_app_id}</span>
+                                    <span className="text-gray-900 dark:text-white font-medium">{game.appId}</span>
                                 </div>
-                                {game.technologies && (
+                                {Array.isArray(game.technologies) && game.technologies.length > 0 && (
                                     <div className="flex justify-between">
                                         <span className="text-gray-600 dark:text-gray-400">Technologies:</span>
-                                        <span className="text-gray-900 dark:text-white font-medium text-right">{game.technologies}</span>
+                                        <span className="text-gray-900 dark:text-white font-medium text-right">
+                                            {game.technologies.join(', ')}
+                                        </span>
                                     </div>
                                 )}
                             </div>
@@ -123,7 +120,7 @@ const GamesPage = () => {
 
                         <div className="flex flex-col gap-4">
                             <a
-                                href={`https://store.steampowered.com/app/${game.steam_app_id}`}
+                                href={`https://store.steampowered.com/app/${game.appId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="p-button block w-full text-center cursor-pointer"
