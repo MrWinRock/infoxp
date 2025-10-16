@@ -39,7 +39,7 @@ const ItemBox = ({ children, className = "", image, alt = "", _id, genreName, to
             onKeyDown={handleKeyDown}
         >
             {/* Main image */}
-            <img src={image || "/images/default.jpg"} alt={alt} className="absolute inset-0 w-full h-full object-cover rounded-xl pointer-events-none" />
+            <img src={image} alt={alt} className="absolute inset-0 w-full h-full object-cover rounded-xl pointer-events-none" />
             {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-black to-[#2880A6] opacity-70 rounded-xl pointer-events-none transition-opacity duration-300 ease-in-out group-hover:opacity-0" />
             {/* Content Wrapper */}

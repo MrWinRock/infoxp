@@ -1,6 +1,6 @@
 import GridContainer from '../item/GridContainer';
 import ItemBox from '../item/ItemBox';
-import { fetchGames, Game } from '../../services/gameService';
+import { fetchTopGames, Game } from '../../services/gameService';
 import { useEffect, useState } from 'react';
 
 const toImageSrc = (imageUrl?: string) =>
@@ -13,7 +13,7 @@ const Home = () => {
 
     useEffect(() => {
         let mounted = true;
-        fetchGames()
+        fetchTopGames()
             .then(data => {
                 if (!mounted) return;
                 setGames(data);
