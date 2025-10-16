@@ -52,7 +52,6 @@ const GenrePage = () => {
             image={toImageSrc(game.image_url)}
             alt={game.title}
             _id={game._id}
-            steam_app_id={game.steam_app_id}
         >
             {game.title}
         </ItemBox>
