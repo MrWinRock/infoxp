@@ -87,39 +87,50 @@ const Chat = () => {
     const mapServerMessages = useCallback((server: ApiChatMessage[]): Message[] =>
         server.map((m) => ({ sender: m.sender === 'user' ? 'user' : 'chatbot', text: m.message })), []);
 
-    const refreshThreads = useCallback(async (uid: string) => {
-        try {
-            const token = localStorage.getItem('auth_token') || undefined;
-            const { sessions } = await listSessionsByUserId(CHAT_BASE, uid, 1, 50, token);
-            const mapped: Thread[] = sessions.map((s, i) => {
-                const created = s.createdAt || s.session_started;
-                const updated = (s as { lastMessageAt?: string | number | Date }).lastMessageAt || s.updatedAt || s.session_started;
-                return {
-                    id: s._id,
-                    title: `Chat ${sessions.length - i}`, // simple label; no title field on server
-                    createdAt: created ? new Date(created).getTime() : now(),
-                    updatedAt: updated ? new Date(updated).getTime() : now(),
-                    preview: '',
-                    messageCount: s.messageCount ?? 0,
-                };
-            }).sort((a, b) => b.updatedAt - a.updatedAt);
-            setThreads(mapped);
-            if (!activeThreadId && mapped[0]) {
-                setActiveThreadId(mapped[0].id);
+    const refreshThreads = useCallback(
+        async (uid: string, options?: { autoSelectIfNone?: boolean }): Promise<Thread[]> => {
+            const autoSelect = options?.autoSelectIfNone ?? true;
+            try {
+                const token = localStorage.getItem('auth_token') || undefined;
+                const { sessions } = await listSessionsByUserId(CHAT_BASE, uid, 1, 50, token);
+                const mapped: Thread[] = sessions
+                    .map((s, i) => {
+                        const created = s.createdAt || s.session_started;
+                        const updated =
+                            (s as { lastMessageAt?: string | number | Date }).lastMessageAt ||
+                            s.updatedAt ||
+                            s.session_started;
+                        return {
+                            id: s._id,
+                            title: `Chat ${sessions.length - i}`,
+                            createdAt: created ? new Date(created).getTime() : now(),
+                            updatedAt: updated ? new Date(updated).getTime() : now(),
+                            preview: '',
+                            messageCount: s.messageCount ?? 0,
+                        };
+                    })
+                    .sort((a, b) => b.updatedAt - a.updatedAt);
+                setThreads(mapped);
+                if (autoSelect && !activeThreadId && mapped[0]) {
+                    setActiveThreadId(mapped[0].id);
+                }
+                return mapped;
+            } catch (e) {
+                console.error('Failed to load sessions', e);
+                return [];
             }
-        } catch (e) {
-            console.error('Failed to load sessions', e);
-        }
-    }, [CHAT_BASE, activeThreadId]);
+        },
+        [CHAT_BASE, activeThreadId]
+    );
 
     // Ensure at least one session exists and load thread list
     useEffect(() => {
         if (!userId) return;
         (async () => {
             const token = localStorage.getItem('auth_token') || undefined;
-            await refreshThreads(userId);
+            const list = await refreshThreads(userId);
             // If no sessions were returned, ensure one exists via getSession
-            if (threads.length === 0) {
+            if (list.length === 0) {
                 try {
                     const s = await getSession(CHAT_BASE, userId, token);
                     setSessionId(s?._id || null);
@@ -236,7 +247,13 @@ const Chat = () => {
             replaceLastBotText(prev => (prev === '...' ? '(no data)' : prev));
 
             // Refresh threads from server to update counts/timestamps
-            if (userId) await refreshThreads(userId);
+            if (userId) {
+                const list = await refreshThreads(userId);
+                // If send with "New Chat" -> auto-select the newly created session
+                if (!activeThreadId && list[0]) {
+                    setActiveThreadId(list[0].id);
+                }
+            }
         } catch (err: unknown) {
             if (err instanceof DOMException && err.name === 'AbortError') {
                 replaceLastBotText(() => '[stopped]');
@@ -278,7 +295,10 @@ const Chat = () => {
 
         setActiveThreadId(null);
         setSessionId(null);
-        if (userId) await refreshThreads(userId);
+        if (userId) {
+            // Do not auto-select the last thread; keep UI in "new chat" state
+            await refreshThreads(userId, { autoSelectIfNone: false });
+        }
     };
 
     const handleSelectThread = (tid: string) => {
@@ -288,7 +308,6 @@ const Chat = () => {
     };
 
     const handleRenameThread = (tid: string) => {
-        // No title field on server; keep local-only label
         const title = prompt('Rename chat', threads.find(t => t.id === tid)?.title || 'New chat');
         if (!title) return;
         setThreads(prev => prev.map(t => (t.id === tid ? { ...t, title } : t)));
@@ -299,8 +318,8 @@ const Chat = () => {
             const token = localStorage.getItem('auth_token') || undefined;
             await deleteSessionById(CHAT_BASE, tid, token);
             if (userId) {
-                await refreshThreads(userId);
-                const nextId = (prev => prev[0]?.id || null)(threads);
+                const list = await refreshThreads(userId);
+                const nextId = list[0]?.id || null;
                 setActiveThreadId(nextId);
             }
             setMessages([]);
