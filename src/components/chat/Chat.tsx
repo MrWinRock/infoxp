@@ -17,8 +17,8 @@ interface Message {
     text: string;
 }
 interface Thread {
-    id: string;          // server session _id
-    title: string;       // simple label
+    id: string;
+    title: string;
     createdAt: number;
     updatedAt: number;
     preview: string;
@@ -205,8 +205,12 @@ const Chat = () => {
         const controller = new AbortController();
         abortRef.current = controller;
 
-        const endpoint = userId ? `${CHAT_BASE}/${encodeURIComponent(userId)}` : CHAT_BASE;
-        console.log('[Chat] POST /api/chat', { endpoint, hasUserId: !!userId, chars: currentInput.length });
+        let endpoint = CHAT_BASE;
+        if (activeThreadId) {
+            endpoint = `${CHAT_BASE}/${encodeURIComponent(activeThreadId)}`;
+        }
+
+        console.log('[Chat] POST /api/chat', { endpoint, hasUserId: !!userId, hasSession: !!activeThreadId, chars: currentInput.length });
 
         try {
             const token = localStorage.getItem('auth_token') || undefined;
@@ -218,6 +222,12 @@ const Chat = () => {
                 token,
                 signal: controller.signal,
             });
+
+            // Bind/refresh session id from server
+            if (result.newSessionId) {
+                setSessionId(result.newSessionId);
+                setActiveThreadId(prev => (prev ?? result.newSessionId ?? null));
+            }
 
             if (result.newUserId && !userId) {
                 setUserId(result.newUserId);
@@ -246,10 +256,9 @@ const Chat = () => {
             console.log('[Chat] stream finished');
             replaceLastBotText(prev => (prev === '...' ? '(no data)' : prev));
 
-            // Refresh threads from server to update counts/timestamps
+            // Refresh threads for authenticated users
             if (userId) {
                 const list = await refreshThreads(userId);
-                // If send with "New Chat" -> auto-select the newly created session
                 if (!activeThreadId && list[0]) {
                     setActiveThreadId(list[0].id);
                 }

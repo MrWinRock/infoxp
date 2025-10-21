@@ -11,6 +11,7 @@ export interface StartChatParams {
 
 export interface StartChatResult {
     newUserId?: string | null;
+    newSessionId?: string | null;
     contentType?: string | null;
     jsonText?: string;
     stream?: ChunkStream;
@@ -47,9 +48,10 @@ export async function startChatStream(params: StartChatParams): Promise<StartCha
     });
 
     const newUserId = res.headers.get("x-user-id");
+    const newSessionId = res.headers.get("x-chat-session-id");
     const contentType = res.headers.get("content-type") || "";
 
-    console.log('[chatService] response', { status: res.status, contentType, newUserId });
+    console.log('[chatService] response', { status: res.status, contentType, newUserId, newSessionId });
 
     if (!res.ok) {
         const errPayload = await res.text().catch(() => "");
@@ -69,7 +71,7 @@ export async function startChatStream(params: StartChatParams): Promise<StartCha
         } catch {
             text = await res.text();
         }
-        return { newUserId, contentType, jsonText: text || "(empty response)", response: res };
+        return { newUserId, newSessionId, contentType, jsonText: text || "(empty response)", response: res };
     }
 
     // Streaming parser factories
@@ -130,7 +132,7 @@ export async function startChatStream(params: StartChatParams): Promise<StartCha
 
     const stream = useSse ? sseStream() : plainTextStream();
 
-    return { newUserId, contentType, stream, response: res };
+    return { newUserId, newSessionId, contentType, stream, response: res };
 }
 
 export interface ApiChatMessage {
