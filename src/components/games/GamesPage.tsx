@@ -2,7 +2,6 @@ import { useEffect, useState, startTransition } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchGameById, type Game } from '../../services/gameService';
 
-// ...existing code...
 const toImageSrc = (imageUrl?: string) =>
     imageUrl?.startsWith('http') ? imageUrl : imageUrl ? `/images/${imageUrl}` : '/images/default.jpg';
 
