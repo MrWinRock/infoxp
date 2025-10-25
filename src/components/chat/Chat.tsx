@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { API_BASE_URL } from '../../config/api';
 import {
     startChatStream,
@@ -221,6 +224,7 @@ const Chat = () => {
                 userId,
                 token,
                 signal: controller.signal,
+                extraBody: { toolName: 'web_search' },
             });
 
             // Bind/refresh session id from server
@@ -336,6 +340,65 @@ const Chat = () => {
             console.error('Delete session failed', e);
             setError(e instanceof Error ? e.message : 'Failed to delete session');
         }
+    };
+
+    // Markdown rendering components for chatbot messages
+    const markdownComponents: Components = {
+        a: (props) => (
+            <a
+                {...props}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+            />
+        ),
+        code: (props) => {
+            const { inline, className, children, ...rest } = props as unknown as {
+                inline?: boolean;
+                className?: string;
+                children?: React.ReactNode;
+            } & React.HTMLAttributes<HTMLElement>;
+            return inline ? (
+                <code
+                    className={`px-1.5 py-0.5 rounded bg-gray-200/70 dark:bg-gray-900/60 ${className || ''}`}
+                    {...rest}
+                >
+                    {children}
+                </code>
+            ) : (
+                <pre className="mb-0 overflow-x-auto">
+                    <code
+                        className={`block w-full rounded-md bg-gray-100 dark:bg-[#0f141b] border border-gray-200 dark:border-gray-700 px-3 py-2 text-sm ${className || ''}`}
+                        {...rest}
+                    >
+                        {children}
+                    </code>
+                </pre>
+            );
+        },
+        ul: ({ children, ...props }) => (
+            <ul className="list-disc pl-6 space-y-1" {...props}>{children}</ul>
+        ),
+        ol: ({ children, ...props }) => (
+            <ol className="list-decimal pl-6 space-y-1" {...props}>{children}</ol>
+        ),
+        blockquote: ({ children, ...props }) => (
+            <blockquote className="border-l-4 pl-3 text-gray-600 dark:text-gray-300" {...props}>
+                {children}
+            </blockquote>
+        ),
+        h1: ({ children, ...props }) => (
+            <h1 className="text-xl font-semibold mt-1.5 mb-1" {...props}>{children}</h1>
+        ),
+        h2: ({ children, ...props }) => (
+            <h2 className="text-lg font-semibold mt-1.5 mb-1" {...props}>{children}</h2>
+        ),
+        h3: ({ children, ...props }) => (
+            <h3 className="text-base font-semibold mt-1.5 mb-1" {...props}>{children}</h3>
+        ),
+        p: ({ children, ...props }) => (
+            <p className="leading-relaxed" {...props}>{children}</p>
+        ),
     };
 
     return (
@@ -489,7 +552,13 @@ const Chat = () => {
                                                         : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-bl-lg'
                                                         }`}
                                                 >
-                                                    <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
+                                                    {m.sender === 'chatbot' ? (
+                                                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                                                            {m.text}
+                                                        </ReactMarkdown>
+                                                    ) : (
+                                                        <p className="whitespace-pre-wrap leading-relaxed">{m.text}</p>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
